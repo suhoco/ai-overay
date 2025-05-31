@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 오버레이 메인 메뉴</title>
+    <link rel="stylesheet" href="main-menu.css">
+</head>
+<body>
+    <div class="container">
+        <div class="main-menu">
+            <!-- Progress Bar -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progressText">1/7</span>
+                </div>
+            </div>
+
+            <!-- Question Container -->
+            <div class="question-container" id="questionContainer">
+                <div class="question-header">
+                    <h2 id="questionTitle">환영합니다!</h2>
+                    <p id="questionDescription">AI 오버레이 시스템에 오신 것을 환영합니다.</p>
+                </div>
+
+                <div class="question-content">
+                    <!-- Welcome/Consent Options -->
+                    <div class="options-container" id="optionsContainer">
+                        <button class="option-btn" data-value="예">예</button>
+                        <button class="option-btn" data-value="아니오">아니오</button>
+                    </div>
+
+                    <!-- Radio Options for Gender, Play Style, AI Style -->
+                    <div class="radio-container" id="radioContainer" style="display: none;">
+                        <!-- Radio buttons will be dynamically generated -->
+                    </div>
+
+                    <!-- Age Input -->
+                    <div class="input-container" id="inputContainer" style="display: none;">
+                        <input type="number" class="form-control" id="ageInput" placeholder="예: 25" min="1" max="120">
+                        <div class="validation-message" id="validationMessage">숫자만 입력 가능합니다</div>
+                    </div>
+
+                    <!-- MBTI Dropdown -->
+                    <div class="select-container" id="selectContainer" style="display: none;">
+                        <select class="form-control" id="mbtiSelect">
+                            <option value="">MBTI를 선택해주세요</option>
+                            <option value="INTJ">INTJ</option>
+                            <option value="INTP">INTP</option>
+                            <option value="ENTJ">ENTJ</option>
+                            <option value="ENTP">ENTP</option>
+                            <option value="INFJ">INFJ</option>
+                            <option value="INFP">INFP</option>
+                            <option value="ENFJ">ENFJ</option>
+                            <option value="ENFP">ENFP</option>
+                            <option value="ISTJ">ISTJ</option>
+                            <option value="ISFJ">ISFJ</option>
+                            <option value="ESTJ">ESTJ</option>
+                            <option value="ESFJ">ESFJ</option>
+                            <option value="ISTP">ISTP</option>
+                            <option value="ISFP">ISFP</option>
+                            <option value="ESTP">ESTP</option>
+                            <option value="ESFP">ESFP</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="navigation-container">
+                    <button class="btn btn--secondary" id="prevBtn" disabled>이전</button>
+                    <button class="btn btn--primary" id="nextBtn">다음</button>
+                </div>
+            </div>
+
+            <!-- Loading Screen -->
+            <div class="loading-container" id="loadingContainer" style="display: none;">
+                <div class="loading-spinner"></div>
+                <h2>사용자 정보 분석 중...</h2>
+                <p>잠시만 기다려주세요.</p>
+            </div>
+
+            <!-- Final Screen -->
+            <div class="final-container" id="finalContainer" style="display: none;">
+                <div class="final-header">
+                    <h2>게임을 실행해 주세요(자동 연동)</h2>
+                    <p>설정이 완료되었습니다.</p>
+                </div>
+                <div class="message-container">
+                    <div class="message-input-container">
+                        <input type="text" id="messageInput" class="form-control" placeholder="이름을 입력 해주세요.">
+                        <button id="sendBtn" class="btn btn--primary">전송</button>
+                    </div>
+                    <div class="message-history" id="messageHistory"></div>
+                </div>
+                <div class="action-buttons">
+                    <button id="editBtn" class="action-btn secondary">설정 수정</button>
+                    <button id="startGameBtn" class="action-btn primary" onclick="startGame()">게임 시작</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="main-menu.js"></script>
+</body>
+</html>
