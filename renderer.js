@@ -31,3 +31,11 @@ function updateOverlayState() {
     toggleBtn.textContent = '🔘 오버레이 켜기';
   }
 }
+
+// 메인으로 돌아가기
+const backButton = document.getElementById('backButton');
+if (backButton) {
+  backButton.addEventListener('click', () => {
+    ipcRenderer.send('open-Main');
+  });
+}
