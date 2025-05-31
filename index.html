@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 340px;
+      padding: 20px;
+      background: rgba(91, 91, 91, 0.6);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      color: white;
+      -webkit-app-region: drag;
+    }
+
+    #overlay > * {
+      -webkit-app-region: no-drag;
+    }
+
+    #topControls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    #toggleOverlayButton {
+      background: #62ff00;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    #toggleOverlayButton:hover {
+      background: #4bc400;
+    }
+
+    #opacitySlider {
+      width: 100px;
+      accent-color: #3399ff;
+      margin-left: 10px;
+    }
+
+    #aiOutput {
+      font-size: 24px;
+      text-align: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    #aiTitle {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: left;
+      margin-bottom: 6px;
+    }
+
+    #aiDescription {
+      font-size: 14px;
+      text-align: left;
+      color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div id="overlay">
+    <!-- 버튼 + 슬라이더 가로 정렬 -->
+    <div id="topControls">
+      <button id="toggleOverlayButton">🔘 오버레이 끄기</button>
+      <input type="range" id="opacitySlider" min="20" max="100" value="100">
+    </div>
+
+    <!-- 출력 텍스트(AI랑 연결 필요) -->
+  <div id="aiOutput">
+    <div id="aiTitle">스켈레톤 지휘관 처치</div>
+    <div id="aiDescription">유적발굴지 3에서 스켈레톤 지휘관 70마리를 처치하세요.</div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
