@@ -14,7 +14,7 @@ function createMainWindow() {
     transparent: true,
     frame: true, // 이후 커스텀 버튼으로 변경 예정
     resizable: false,
-    skipTaskbar: true,
+    skipTaskbar: false,
     hasShadow: false,
     webPreferences: {
       preload: path.join(__dirname, 'renderer.js'),
