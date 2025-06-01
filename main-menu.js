@@ -367,11 +367,6 @@ function completeQuestionnaire() {
     // Simulate analysis time
     setTimeout(() => {
         showFinalScreen();
-
-        if (typeof require !== 'undefined') {
-            const { ipcRenderer } = require('electron');
-            ipcRenderer.send('start-game-mode');
-        }
     }, 3000);
 }
 

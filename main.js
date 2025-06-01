@@ -1,4 +1,4 @@
-﻿const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
+﻿const { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut} = require('electron');
 const path = require('path');
 
 let mainWindow = null;
@@ -27,7 +27,7 @@ function createMainWindow() {
 function createOverlayWindow() {
     overlayWindow = new BrowserWindow({
         width: 360,
-        height: 220,
+        height: 400,
         transparent: true,
         frame: false,
         alwaysOnTop: true,
@@ -190,6 +190,18 @@ ipcMain.on('toggle-overlay', () => {
     toggleOverlay();
 });
 
+ipcMain.on('open-Main', () => {
+    if (!mainWindow) {
+        createMainWindow();
+    } else {
+        mainWindow.show();
+    }
+
+    if (mainWindow) {
+        overlayWindow.hide();
+    }
+});
+
 // 앱 준비 완료 시 실행
 app.whenReady().then(() => {
     createMainWindow();   // 메인 창 생성
@@ -205,6 +217,24 @@ app.whenReady().then(() => {
             createMainWindow();
         }
     });
+
+    globalShortcut.register('F8', () => {
+        if (overlayWindow && overlayWindow.webContents) {
+            overlayWindow.webContents.send('prev-ai-text');
+        }
+    });
+
+    globalShortcut.register('F9', () => {
+        if (overlayWindow && overlayWindow.webContents) {
+            overlayWindow.webContents.send('next-ai-text');
+        }
+    });
+
+    globalShortcut.register('F6', () => {
+        if (overlayWindow && overlayWindow.webContents) {
+            overlayWindow.webContents.send('show-loading');
+        }
+    });
 });
 
 app.on('window-all-closed', () => {
@@ -215,4 +245,5 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
     app.isQuiting = true;
+    globalShortcut.unregisterAll(); //앱 종료 시 전역 단축 키 해제
 });
