@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
+const { globalShortcut } = require('electron');
 const path = require('path');
 
 let main_win = null;
@@ -31,7 +32,7 @@ function createMainWindow() {
 function createOverlayWindow() {
   overlay_win = new BrowserWindow({
     width: 360,
-    height: 220,
+    height: 400,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -179,6 +180,28 @@ ipcMain.on('open-Main', () => {
 
 
 app.whenReady().then(() => {
-  createMainWindow(); // 오버레이 창 생성
+  createMainWindow(); // 메인 윈도우 생성
   createTray(); // 트레이 아이콘 생성
+
+  globalShortcut.register('F8', () => {
+    if (overlay_win && overlay_win.webContents) {
+      overlay_win.webContents.send('prev-ai-text');
+    }
+  });
+
+  globalShortcut.register('F9', () => {
+    if (overlay_win && overlay_win.webContents) {
+      overlay_win.webContents.send('next-ai-text');
+    }
+  });
+
+  globalShortcut.register('F6', () => {
+    if (overlay_win && overlay_win.webContents) {
+      overlay_win.webContents.send('show-loading');
+    }
+  });
+});
+//앱 종료 시 전역 단축 키 해제
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
 });

@@ -1,102 +1,172 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
-    }
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: 'Segoe UI', sans-serif;
+      }
 
-    * {
-      box-sizing: border-box;
-    }
+      * {
+        box-sizing: border-box;
+      }
 
-    #overlay {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      width: 340px;
-      padding: 20px;
-      background: rgba(91, 91, 91, 0.6);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-      color: white;
-      -webkit-app-region: drag;
-    }
+      #overlay {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 340px;
+        padding: 20px;
+        background: rgba(91, 91, 91, 0.6);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        color: white;
+        -webkit-app-region: drag;
+      }
 
-    #overlay > * {
-      -webkit-app-region: no-drag;
-    }
+      #overlay > * {
+        -webkit-app-region: no-drag;
+      }
 
-    #topControls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
+      #topControls {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+      }
 
-    #toggleOverlayButton {
-      background: #62ff00;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      font-size: 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
+      .leftControls {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
 
-    #toggleOverlayButton:hover {
-      background: #4bc400;
-    }
+      #toggleOverlayButton {
+        background: #62ff00;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        font-size: 14px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
 
-    #opacitySlider {
-      width: 100px;
-      accent-color: #3399ff;
-      margin-left: 10px;
-    }
+      #toggleOverlayButton:hover {
+        background: #4bc400;
+      }
 
-    #aiOutput {
-      font-size: 24px;
-      text-align: center;
-      font-weight: bold;
-      color: white;
-    }
+      #opacitySlider {
+        width: 100px;
+        accent-color: #3399ff;
+        margin-left: 10px;
+        margin-top: 30px;
+      }
 
-    #aiTitle {
-      font-size: 24px;
-      font-weight: bold;
-      text-align: left;
-      margin-bottom: 6px;
-    }
+      #aiOutput {
+        font-size: 24px;
+        text-align: center;
+        font-weight: bold;
+        color: white;
+      }
 
-    #aiDescription {
-      font-size: 14px;
-      text-align: left;
-      color: #f0f0f0;
-    }
-  </style>
-</head>
-<body>
-  <div id="overlay">
-    <!-- 버튼 + 슬라이더 가로 정렬 -->
-    <div id="topControls">
-      <button id="toggleOverlayButton">🔘 오버레이 끄기</button>
-      <input type="range" id="opacitySlider" min="20" max="100" value="100">
+      #aiTitle {
+        font-size: 24px;
+        font-weight: bold;
+        text-align: left;
+        margin-bottom: 6px;
+      }
+
+      #aiDescription {
+        font-size: 14px;
+        text-align: left;
+        color: #f0f0f0;
+      }
+
+      #backButton {
+        background: lightskyblue;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        font-size: 14px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      #backButton:hover {
+        background: #666;
+      }
+
+      #loadingContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 120px;
+      }
+
+      #gameName{
+        font-size: 18px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 8px;
+        color: #a0d8ff;
+      }
+
+      .spinner {
+        width: 36px;
+        height: 36px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 12px;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      .loadingText {
+        font-size: 16px;
+        color: #f0f0f0;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="overlay">
+      <!-- 버튼 + 슬라이더 가로 정렬 -->
+      <div id="topControls">
+        <div class="leftControls">
+          <button id="toggleOverlayButton">🔘 오버레이 끄기</button>
+          <button id="backButton">⬅ 메인으로 돌아가기</button>
+        </div>
+        <input type="range" id="opacitySlider" min="20" max="100" value="100">
+      </div>
+
+      <!-- 출력 텍스트(AI랑 연결 필요) -->
+      <div id="aiOutput">
+        <!-- 로딩 화면 -->
+        <div id="loadingContainer">
+          <div class="spinner"></div>
+          <div class="loadingText">게임 탐색 중...</div>
+        </div>
+
+        <!-- 실제 텍스트 콘텐츠 -->
+        <div id="textContent" style="display: none;">
+          <div id="gameName"></div>
+          <div id="aiTitle">스켈레톤 지휘관 처치</div>
+          <div id="aiDescription">유적발굴지 3에서 스켈레톤 지휘관 70마리를 처치하세요.</div>
+        </div>
+      </div>
     </div>
 
-    <!-- 출력 텍스트(AI랑 연결 필요) -->
-  <div id="aiOutput">
-    <div id="aiTitle">스켈레톤 지휘관 처치</div>
-    <div id="aiDescription">유적발굴지 3에서 스켈레톤 지휘관 70마리를 처치하세요.</div>
-  </div>
-
-    <button id="backButton">⬅ 메인으로 돌아가기</button>
-
-  <script src="renderer.js"></script>
-</body>
-</html>
+    <script src="renderer.js"></script>
+  </body>
+  </html>
