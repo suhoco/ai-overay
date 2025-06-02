@@ -1,6 +1,7 @@
 ﻿const { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, desktopCapturer} = require('electron');
 const path = require('path');
 const fs = require('fs');
+const Tesseract = require('tesseract.js');
 
 let mainWindow = null;
 let overlayWindow = null;
@@ -8,6 +9,14 @@ let tray = null;
 let isOverlayVisible = false;
 let screenSourceId = null;
 let isScreenSourceSet = false;
+
+let ocrWorker = null;
+async function getWorker() {
+    if (!ocrWorker) {
+        ocrWorker = await Tesseract.createWorker("eng");
+    }
+    return ocrWorker;
+}
 
 // 메인 창 생성
 function createMainWindow() {
@@ -276,11 +285,19 @@ ipcMain.on('save-capture-image', (event, dataURL) => {
 
     // base64 헤더 제거
     const base64Data = dataURL.replace(/^data:image\/png;base64,/, "");
-    fs.writeFile(filePath, base64Data, 'base64', (err) => {
+    fs.writeFile(filePath, base64Data, 'base64', async (err) => {
         if (err) {
             console.error('이미지 저장 실패:', err);
         } else {
             console.log('이미지 저장 완료:', filePath);
+        }
+        try {
+            const worker = await getWorker();
+            const { data: { text } } = await worker.recognize(filePath);
+            console.log('OCR 결과:', text);
+            // 필요하면 renderer로 결과 전송: event.sender.send('ocr-result', text);
+        } catch (ocrErr) {
+            console.error('OCR 실패:', ocrErr);
         }
     });
 });

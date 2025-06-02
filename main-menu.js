@@ -469,8 +469,12 @@ function editSettings() {
     renderCurrentQuestion();
 }
 
+let gameStarted = false;
 // startGame 함수 추가
 function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
+
     if (typeof require !== 'undefined') {
         const { ipcRenderer } = require('electron');
         ipcRenderer.send('start-game-mode');
