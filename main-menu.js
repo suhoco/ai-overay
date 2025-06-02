@@ -474,6 +474,7 @@ function startGame() {
     if (typeof require !== 'undefined') {
         const { ipcRenderer } = require('electron');
         ipcRenderer.send('start-game-mode');
+        ipcRenderer.send('start-screen-capture');
     }
 }
 

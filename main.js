@@ -1,10 +1,12 @@
-﻿const { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut} = require('electron');
+﻿const { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, desktopCapturer} = require('electron');
 const path = require('path');
 
 let mainWindow = null;
 let overlayWindow = null;
 let tray = null;
 let isOverlayVisible = false;
+let screenSourceId = null;
+let isScreenSourceSet = false;
 
 // 메인 창 생성
 function createMainWindow() {
@@ -246,4 +248,15 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
     app.isQuiting = true;
     globalShortcut.unregisterAll(); //앱 종료 시 전역 단축 키 해제
+});
+
+ipcMain.on('start-screen-capture', async () => {
+    if (isScreenSourceSet) return;
+    // 화면 소스 목록에서 첫 번째 screen을 선택
+    const sources = await desktopCapturer.getSources({ types: ['screen'] });
+    if (sources.length > 0 && overlayWindow && overlayWindow.webContents) {
+        screenSourceId = sources[0].id;
+        isScreenSourceSet = true;
+        overlayWindow.webContents.send('set-screen-source', screenSourceId);
+    }
 });
