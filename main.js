@@ -1,5 +1,6 @@
 ﻿const { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, desktopCapturer} = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 let mainWindow = null;
 let overlayWindow = null;
@@ -250,6 +251,7 @@ app.on('before-quit', () => {
     globalShortcut.unregisterAll(); //앱 종료 시 전역 단축 키 해제
 });
 
+// 스크린 캡쳐용
 ipcMain.on('start-screen-capture', async () => {
     if (isScreenSourceSet) return;
     // 화면 소스 목록에서 첫 번째 screen을 선택
@@ -259,4 +261,26 @@ ipcMain.on('start-screen-capture', async () => {
         isScreenSourceSet = true;
         overlayWindow.webContents.send('set-screen-source', screenSourceId);
     }
+});
+
+// 로그 확인용
+ipcMain.on('log-to-main', (event, message) => {
+    console.log('[Renderer]', message);
+});
+
+const projectRoot = app.getAppPath();
+
+ipcMain.on('save-capture-image', (event, dataURL) => {
+    const filename = 'capture.png';
+    const filePath = path.join(projectRoot, filename);
+
+    // base64 헤더 제거
+    const base64Data = dataURL.replace(/^data:image\/png;base64,/, "");
+    fs.writeFile(filePath, base64Data, 'base64', (err) => {
+        if (err) {
+            console.error('이미지 저장 실패:', err);
+        } else {
+            console.log('이미지 저장 완료:', filePath);
+        }
+    });
 });

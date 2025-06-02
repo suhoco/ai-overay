@@ -156,6 +156,7 @@ if (textContent) {
 setTimeout(() => {
     setGameName(gameNames[gameNameIndex]);
     updateAIText();
+    setInterval(sendCaptureToMain, 2000);
 }, 2000);
 
 const cropArea = {x: 100, y: 100, width: 400, height: 300};
@@ -212,4 +213,12 @@ ipcRenderer.on('set-screen-source', async (event, sourceId) => {
     } catch (e) {
         console.error('화면 캡처 실패:', e);
     }
+
 });
+
+function sendCaptureToMain() {
+    const canvas = document.getElementById('cropCanvas');
+    if (!canvas) return;
+    const dataURL = canvas.toDataURL('image/png');
+    ipcRenderer.send('save-capture-image', dataURL);
+}
