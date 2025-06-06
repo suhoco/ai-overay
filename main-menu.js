@@ -381,20 +381,53 @@ function showFinalScreen() {
     elements.messageInput.focus();
 }
 
-// Send message
-function sendMessage() {
-    const message = elements.messageInput.value.trim();
-    if (message) {
-        addMessageToHistory(message);
-        elements.messageInput.value = '';
+// persona
+let finalPersona = null;
 
-        // Simulate AI response
-        setTimeout(() => {
-            addAIMessageToHistory("메시지를 받았습니다. 게임 연동을 확인하고 있습니다.");
-        }, 1000);
-        setTimeout(() => {
-            addAIMessageToHistory("AI가 준비되었습니다. 게임을 시작해주세요.");
-        }, 2000);
+function buildPersonaFromAnswers(answers, gameType) {
+    const parts = [];
+    if (answers[4]) parts.push(`${answers[4]}살 `);
+    if (answers[5]) parts.push(`${answers[5]}인 `);
+    if (answers[6]) parts.push(`${answers[7]}있는 성격의 `);
+    if (answers[7]) parts.push(`${answers[6]}하게 가이드하는 `);
+    if (answers[3]) parts.push(`${answers[3]}야 `);
+
+    parts.push(`${gameType} 게임에 관한 글을 요약해줘`);
+    return `너는 ${parts.join(' ')}.`;
+}
+
+// Send message
+async function sendMessage() {
+    const message = elements.messageInput.value.trim();
+    if (!message) return;
+
+    addMessageToHistory(message);
+    elements.messageInput.value = '';
+
+    addAIMessageToHistory("메시지를 받았습니다. 게임 연동을 확인하고 있습니다.");
+    if (!finalPersona) {
+        finalPersona = buildPersonaFromAnswers(appState.answers, message);
+    }
+
+    try {
+        const result = await require('electron').ipcRenderer.invoke('query-ai', {
+            prompt: "Connection test",
+            persona: finalPersona
+        });
+        addAIMessageToHistory
+        if (result.success) {
+            if (result.ready && !gameStarted) {
+                addAIMessageToHistory("AI가 준비되었습니다. 게임을 시작해주세요.");
+                ipcRenderer.send('set-game-name', message);
+                startGame();
+            } else {
+                addAIMessageToHistory("연결 성공. 이후부터는 AI 응답이 가능합니다.");
+            }
+        } else {
+            addAIMessageToHistory(`AI 연결 실패: ${result.error}`);
+        }
+    } catch (err) {
+        addAIMessageToHistory(`AI 호출 예외: ${err.message}`);
     }
 }
 
@@ -465,11 +498,16 @@ function editSettings() {
     renderCurrentQuestion();
 }
 
+let gameStarted = false;
 // startGame 함수 추가
 function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
+
     if (typeof require !== 'undefined') {
         const { ipcRenderer } = require('electron');
         ipcRenderer.send('start-game-mode');
+        ipcRenderer.send('start-screen-capture');
     }
 }
 

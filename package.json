@@ -8,5 +8,9 @@
   },
   "devDependencies": {
     "electron": "^25.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "tesseract.js": "^6.0.1"
   }
 }

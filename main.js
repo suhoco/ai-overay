@@ -1,10 +1,26 @@
-﻿const { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut} = require('electron');
+﻿const { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, desktopCapturer} = require('electron');
 const path = require('path');
+const fs = require('fs');
+const Tesseract = require('tesseract.js');
+const { queryHuggingFaceAPI } = require('./huggingface-api');
 
 let mainWindow = null;
 let overlayWindow = null;
 let tray = null;
 let isOverlayVisible = false;
+let screenSourceId = null;
+let isScreenSourceSet = false;
+let cachedPersona = null;
+let modelReady = false;
+let selectedGameName = null;
+
+let ocrWorker = null;
+async function getWorker() {
+    if (!ocrWorker) {
+        ocrWorker = await Tesseract.createWorker("eng");
+    }
+    return ocrWorker;
+}
 
 // 메인 창 생성
 function createMainWindow() {
@@ -151,6 +167,34 @@ function updateOverlayUI() {
 }
 
 // IPC 이벤트 핸들러들
+ipcMain.handle('query-ai', async (event, { prompt, persona }) => {
+    try {
+        if (!cachedPersona && persona) {
+            cachedPersona = persona; // 최초 1회만 저장
+        }
+
+        const response = await queryHuggingFaceAPI(prompt, cachedPersona);
+
+        if (!modelReady) modelReady = true;
+
+        return {
+            success: true,
+            response,
+            ready: modelReady
+        };
+
+    } catch (err) {
+        return {
+            success: false,
+            error: err.message
+        };
+    }
+});
+
+ipcMain.on('set-game-name', (event, gameName) => {
+    selectedGameName = gameName;
+});
+
 ipcMain.on('start-game-mode', () => {
     console.log('게임 모드 시작');
 
@@ -218,21 +262,9 @@ app.whenReady().then(() => {
         }
     });
 
-    globalShortcut.register('F8', () => {
+    globalShortcut.register('F5', () => {
         if (overlayWindow && overlayWindow.webContents) {
-            overlayWindow.webContents.send('prev-ai-text');
-        }
-    });
-
-    globalShortcut.register('F9', () => {
-        if (overlayWindow && overlayWindow.webContents) {
-            overlayWindow.webContents.send('next-ai-text');
-        }
-    });
-
-    globalShortcut.register('F6', () => {
-        if (overlayWindow && overlayWindow.webContents) {
-            overlayWindow.webContents.send('show-loading');
+            overlayWindow.webContents.send('update-ai-text');
         }
     });
 });
@@ -246,4 +278,54 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
     app.isQuiting = true;
     globalShortcut.unregisterAll(); //앱 종료 시 전역 단축 키 해제
+});
+
+// 스크린 캡쳐용
+ipcMain.on('start-screen-capture', async () => {
+    if (isScreenSourceSet) return;
+    // 화면 소스 목록에서 첫 번째 screen을 선택
+    const sources = await desktopCapturer.getSources({ types: ['screen'] });
+    if (sources.length > 0 && overlayWindow && overlayWindow.webContents) {
+        screenSourceId = sources[0].id;
+        isScreenSourceSet = true;
+        overlayWindow.webContents.send('set-screen-source', {
+            screenId: screenSourceId,
+            gameName: selectedGameName || 'Unknown'
+        });
+    }
+});
+
+// 로그 확인용
+ipcMain.on('log-to-main', (event, message) => {
+    console.log('[Renderer]', message);
+});
+
+const projectRoot = app.getAppPath();
+
+ipcMain.on('save-capture-image', (event, dataURL) => {
+    const filename = 'capture.png';
+    const filePath = path.join(projectRoot, filename);
+
+    // base64 헤더 제거
+    const base64Data = dataURL.replace(/^data:image\/png;base64,/, "");
+    fs.writeFile(filePath, base64Data, 'base64', async (err) => {
+        if (err) {
+            console.error('이미지 저장 실패:', err);
+        } else {
+            console.log('이미지 저장 완료:', filePath);
+        }
+        try {
+            const worker = await getWorker();
+            const { data: { text } } = await worker.recognize(filePath);
+            console.log('OCR 결과:', text);
+
+            const aiResult = await queryHuggingFaceAPI(text, cachedPersona);
+
+            if (overlayWindow && overlayWindow.webContents) {
+                overlayWindow.webContents.send('ai-result-ready', aiResult);
+            }
+        } catch (ocrErr) {
+            console.error('OCR 실패:', ocrErr);
+        }
+    });
 });
