@@ -12,6 +12,7 @@ let screenSourceId = null;
 let isScreenSourceSet = false;
 let cachedPersona = null;
 let modelReady = false;
+let selectedGameName = null;
 
 let ocrWorker = null;
 async function getWorker() {
@@ -190,6 +191,10 @@ ipcMain.handle('query-ai', async (event, { prompt, persona }) => {
     }
 });
 
+ipcMain.on('set-game-name', (event, gameName) => {
+    selectedGameName = gameName;
+});
+
 ipcMain.on('start-game-mode', () => {
     console.log('게임 모드 시작');
 
@@ -257,21 +262,9 @@ app.whenReady().then(() => {
         }
     });
 
-    globalShortcut.register('F8', () => {
+    globalShortcut.register('F5', () => {
         if (overlayWindow && overlayWindow.webContents) {
-            overlayWindow.webContents.send('prev-ai-text');
-        }
-    });
-
-    globalShortcut.register('F9', () => {
-        if (overlayWindow && overlayWindow.webContents) {
-            overlayWindow.webContents.send('next-ai-text');
-        }
-    });
-
-    globalShortcut.register('F6', () => {
-        if (overlayWindow && overlayWindow.webContents) {
-            overlayWindow.webContents.send('show-loading');
+            overlayWindow.webContents.send('update-ai-text');
         }
     });
 });
@@ -295,7 +288,10 @@ ipcMain.on('start-screen-capture', async () => {
     if (sources.length > 0 && overlayWindow && overlayWindow.webContents) {
         screenSourceId = sources[0].id;
         isScreenSourceSet = true;
-        overlayWindow.webContents.send('set-screen-source', screenSourceId);
+        overlayWindow.webContents.send('set-screen-source', {
+            screenId: screenSourceId,
+            gameName: selectedGameName || 'Unknown'
+        });
     }
 });
 
@@ -322,7 +318,12 @@ ipcMain.on('save-capture-image', (event, dataURL) => {
             const worker = await getWorker();
             const { data: { text } } = await worker.recognize(filePath);
             console.log('OCR 결과:', text);
-            // 필요하면 renderer로 결과 전송: event.sender.send('ocr-result', text);
+
+            const aiResult = await queryHuggingFaceAPI(text, cachedPersona);
+
+            if (overlayWindow && overlayWindow.webContents) {
+                overlayWindow.webContents.send('ai-result-ready', aiResult);
+            }
         } catch (ocrErr) {
             console.error('OCR 실패:', ocrErr);
         }

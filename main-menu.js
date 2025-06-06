@@ -404,7 +404,7 @@ async function sendMessage() {
     addMessageToHistory(message);
     elements.messageInput.value = '';
 
-
+    addAIMessageToHistory("메시지를 받았습니다. 게임 연동을 확인하고 있습니다.");
     if (!finalPersona) {
         finalPersona = buildPersonaFromAnswers(appState.answers, message);
     }
@@ -418,6 +418,7 @@ async function sendMessage() {
         if (result.success) {
             if (result.ready && !gameStarted) {
                 addAIMessageToHistory("AI가 준비되었습니다. 게임을 시작해주세요.");
+                ipcRenderer.send('set-game-name', message);
                 startGame();
             } else {
                 addAIMessageToHistory("연결 성공. 이후부터는 AI 응답이 가능합니다.");
