@@ -66,7 +66,6 @@ if (backButton) {
 
 function updateAIText() {
     const { title, description } = aiTexts[aiTextIndex];
-    document.getElementById("aiTitle").textContent = title;
     document.getElementById("aiDescription").textContent = description;
     if (loadingContainer) loadingContainer.style.display = 'none';
     if (textContent) textContent.style.display = 'block';
