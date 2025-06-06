@@ -387,21 +387,17 @@ function sendMessage() {
     if (message) {
         addMessageToHistory(message);
         elements.messageInput.value = '';
-        
+
         // Simulate AI response
         setTimeout(() => {
-            const responses = [
-                "메시지를 받았습니다. 게임 연동을 확인하고 있습니다.",
-                "설정이 적용되었습니다.",
-                "AI가 준비되었습니다. 게임을 시작해주세요.",
-                "명령을 처리하고 있습니다.",
-                "연동이 성공적으로 완료되었습니다."
-            ];
-            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-            addAIMessageToHistory(randomResponse);
+            addAIMessageToHistory("메시지를 받았습니다. 게임 연동을 확인하고 있습니다.");
         }, 1000);
+        setTimeout(() => {
+            addAIMessageToHistory("AI가 준비되었습니다. 게임을 시작해주세요.");
+        }, 2000);
     }
 }
+
 
 // Handle message input key press
 function handleMessageKeyPress(event) {
