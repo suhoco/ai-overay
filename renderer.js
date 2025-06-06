@@ -76,7 +76,7 @@ setTimeout(() => {
     updateAIText();
 }, 2000);
 
-const cropArea = {x: 100, y: 100, width: 400, height: 300};
+const cropArea = {x: 570, y: 320, width: 350, height: 150};
 
 ipcRenderer.on('set-screen-source', async (event, data) => {
     if (isScreenStreamSet) {
