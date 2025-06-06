@@ -39,6 +39,12 @@
       margin-bottom: 16px;
     }
 
+    .leftControls {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
     #toggleOverlayButton {
       background: #62ff00;
       color: white;
@@ -79,22 +85,88 @@
       text-align: left;
       color: #f0f0f0;
     }
+
+    #backButton {
+      background: lightskyblue;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    #backButton:hover {
+      background: #666;
+    }
+
+    #loadingContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 120px;
+    }
+
+    #gameName{
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #a0d8ff;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loadingText {
+      font-size: 16px;
+      color: #f0f0f0;
+    }
   </style>
 </head>
 <body>
-  <div id="overlay">
-    <!-- 버튼 + 슬라이더 가로 정렬 -->
-    <div id="topControls">
+<div id="overlay">
+  <!-- 버튼 + 슬라이더 가로 정렬 -->
+  <div id="topControls">
+    <div class="leftControls">
       <button id="toggleOverlayButton">🔘 오버레이 끄기</button>
-      <input type="range" id="opacitySlider" min="20" max="100" value="100">
+      <button id="backButton">⬅ 메인으로 돌아가기</button>
     </div>
-
-    <!-- 출력 텍스트(AI랑 연결 필요) -->
-  <div id="aiOutput">
-    <div id="aiTitle">스켈레톤 지휘관 처치</div>
-    <div id="aiDescription">유적발굴지 3에서 스켈레톤 지휘관 70마리를 처치하세요.</div>
+    <input type="range" id="opacitySlider" min="20" max="100" value="100">
   </div>
 
-  <script src="renderer.js"></script>
+  <!-- 출력 텍스트(AI랑 연결 필요) -->
+  <div id="aiOutput">
+    <!-- 게임 이름 -->
+    <div id="gameName"></div>
+
+    <!-- 로딩 화면 -->
+    <div id="loadingContainer">
+      <div class="spinner"></div>
+      <div class="loadingText">게임 탐색 중...</div>
+    </div>
+
+    <!-- 실제 텍스트 콘텐츠 -->
+    <div id="textContent" style="display: none;">
+      <div id="aiTitle">스켈레톤 지휘관 처치</div>
+      <div id="aiDescription">유적발굴지 3에서 스켈레톤 지휘관 70마리를 처치하세요.</div>
+    </div>
+  </div>
+</div>
+
+<script src="renderer.js"></script>
 </body>
 </html>
