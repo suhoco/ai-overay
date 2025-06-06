@@ -384,7 +384,7 @@ function showFinalScreen() {
 // persona
 let finalPersona = null;
 
-function buildPersonaFromAnswers(answers) {
+function buildPersonaFromAnswers(answers, gameType) {
     const parts = [];
     if (answers[4]) parts.push(`${answers[4]}살 `);
     if (answers[5]) parts.push(`${answers[5]}인 `);
@@ -392,7 +392,7 @@ function buildPersonaFromAnswers(answers) {
     if (answers[7]) parts.push(`${answers[6]}하게 가이드하는 `);
     if (answers[3]) parts.push(`${answers[3]}야 `);
 
-    parts.push("Maple story 게임에 관한 글을 요약해줘");
+    parts.push(`${gameType} 게임에 관한 글을 요약해줘`);
     return `너는 ${parts.join(' ')}.`;
 }
 
@@ -404,16 +404,17 @@ async function sendMessage() {
     addMessageToHistory(message);
     elements.messageInput.value = '';
 
+
     if (!finalPersona) {
-        finalPersona = buildPersonaFromAnswers(appState.answers);
+        finalPersona = buildPersonaFromAnswers(appState.answers, message);
     }
 
     try {
         const result = await require('electron').ipcRenderer.invoke('query-ai', {
-            prompt: message,
+            prompt: "Connection test",
             persona: finalPersona
         });
-
+        addAIMessageToHistory
         if (result.success) {
             if (result.ready && !gameStarted) {
                 addAIMessageToHistory("AI가 준비되었습니다. 게임을 시작해주세요.");
