@@ -381,27 +381,54 @@ function showFinalScreen() {
     elements.messageInput.focus();
 }
 
+// persona
+let finalPersona = null;
+
+function buildPersonaFromAnswers(answers) {
+    const parts = [];
+    if (answers[4]) parts.push(`${answers[4]}살 `);
+    if (answers[5]) parts.push(`${answers[5]}인 `);
+    if (answers[6]) parts.push(`${answers[7]}있는 성격의 `);
+    if (answers[7]) parts.push(`${answers[6]}하게 가이드하는 `);
+    if (answers[3]) parts.push(`${answers[3]}야 `);
+
+    parts.push("Maple story 게임에 관한 글을 요약해줘");
+    return `너는 ${parts.join(' ')}.`;
+}
+
 // Send message
-function sendMessage() {
+async function sendMessage() {
     const message = elements.messageInput.value.trim();
-    if (message) {
-        addMessageToHistory(message);
-        elements.messageInput.value = '';
-        
-        // Simulate AI response
-        setTimeout(() => {
-            const responses = [
-                "메시지를 받았습니다. 게임 연동을 확인하고 있습니다.",
-                "설정이 적용되었습니다.",
-                "AI가 준비되었습니다. 게임을 시작해주세요.",
-                "명령을 처리하고 있습니다.",
-                "연동이 성공적으로 완료되었습니다."
-            ];
-            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-            addAIMessageToHistory(randomResponse);
-        }, 1000);
+    if (!message) return;
+
+    addMessageToHistory(message);
+    elements.messageInput.value = '';
+
+    if (!finalPersona) {
+        finalPersona = buildPersonaFromAnswers(appState.answers);
+    }
+
+    try {
+        const result = await require('electron').ipcRenderer.invoke('query-ai', {
+            prompt: message,
+            persona: finalPersona
+        });
+
+        if (result.success) {
+            if (result.ready && !gameStarted) {
+                addAIMessageToHistory("AI가 준비되었습니다. 게임을 시작해주세요.");
+                startGame();
+            } else {
+                addAIMessageToHistory("연결 성공. 이후부터는 AI 응답이 가능합니다.");
+            }
+        } else {
+            addAIMessageToHistory(`AI 연결 실패: ${result.error}`);
+        }
+    } catch (err) {
+        addAIMessageToHistory(`AI 호출 예외: ${err.message}`);
     }
 }
+
 
 // Handle message input key press
 function handleMessageKeyPress(event) {

@@ -222,3 +222,13 @@ function sendCaptureToMain() {
     const dataURL = canvas.toDataURL('image/png');
     ipcRenderer.send('save-capture-image', dataURL);
 }
+
+function requestAIResponse(prompt, persona) {
+    ipcRenderer.invoke('query-ai', { prompt, persona })
+        .then(response => {
+            document.getElementById('aiDescription').textContent = response;
+        })
+        .catch(err => {
+            console.error('AI 호출 실패:', err);
+        });
+}

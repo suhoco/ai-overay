@@ -2,6 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const Tesseract = require('tesseract.js');
+const { queryHuggingFaceAPI } = require('./huggingface-api');
 
 let mainWindow = null;
 let overlayWindow = null;
@@ -9,6 +10,8 @@ let tray = null;
 let isOverlayVisible = false;
 let screenSourceId = null;
 let isScreenSourceSet = false;
+let cachedPersona = null;
+let modelReady = false;
 
 let ocrWorker = null;
 async function getWorker() {
@@ -163,6 +166,30 @@ function updateOverlayUI() {
 }
 
 // IPC 이벤트 핸들러들
+ipcMain.handle('query-ai', async (event, { prompt, persona }) => {
+    try {
+        if (!cachedPersona && persona) {
+            cachedPersona = persona; // 최초 1회만 저장
+        }
+
+        const response = await queryHuggingFaceAPI(prompt, cachedPersona);
+
+        if (!modelReady) modelReady = true;
+
+        return {
+            success: true,
+            response,
+            ready: modelReady
+        };
+
+    } catch (err) {
+        return {
+            success: false,
+            error: err.message
+        };
+    }
+});
+
 ipcMain.on('start-game-mode', () => {
     console.log('게임 모드 시작');
 
